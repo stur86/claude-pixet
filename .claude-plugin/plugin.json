@@ -1,0 +1,18 @@
+{
+  "name": "pixet",
+  "version": "0.1.0",
+  "description": "Pixel art editor MCP server: indexed-color PNG drawing tools for Claude",
+  "author": {
+    "name": "Simone Sturniolo",
+    "email": "simonesturniolo@gmail.com"
+  },
+  "repository": "https://github.com/stur86/claude-pixet",
+  "license": "MIT",
+  "keywords": ["pixel-art", "mcp", "png", "drawing"],
+  "mcpServers": {
+    "pixet": {
+      "command": "uv",
+      "args": ["run", "--directory", "${CLAUDE_PLUGIN_ROOT}", "pixet-mcp"]
+    }
+  }
+}

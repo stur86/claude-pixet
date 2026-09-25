@@ -3,6 +3,7 @@ name = "pixet"
 version = "0.1.0"
 description = "MCP server: stateful indexed-color pixel art editor"
 readme = "README.md"
+license = "MIT"
 authors = [
     { name = "Simone Sturniolo", email = "simonesturniolo@gmail.com" }
 ]

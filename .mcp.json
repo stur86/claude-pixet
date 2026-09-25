@@ -1,8 +1,0 @@
-{
-  "mcpServers": {
-    "pixet": {
-      "command": "uv",
-      "args": ["run", "--directory", ".", "pixet-mcp"]
-    }
-  }
-}

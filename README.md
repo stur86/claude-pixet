@@ -11,11 +11,28 @@ color indices and the full palette (also colors not used yet).
 
 ## Install in Claude Code
 
-This repo has a `.mcp.json`, so Claude Code started in this directory picks it up.
-To use it from any project:
+This repo is a Claude Code plugin marketplace. You need
+[uv](https://docs.astral.sh/uv/) on your `PATH`. In Claude Code, run:
+
+```
+/plugin marketplace add stur86/claude-pixet
+/plugin install pixet@claude-pixet
+```
+
+Or from the shell:
 
 ```sh
-claude mcp add pixet --scope user -- uv run --directory /home/simon/claude-pixet pixet-mcp
+claude plugin marketplace add stur86/claude-pixet
+claude plugin install pixet@claude-pixet
+```
+
+The plugin starts the MCP server with `uv run`, so the first start installs
+the Python dependencies.
+
+To develop, load the plugin from your clone for one session:
+
+```sh
+claude --plugin-dir /path/to/claude-pixet
 ```
 
 ## Tools
