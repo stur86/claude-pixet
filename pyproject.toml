@@ -1,0 +1,25 @@
+[project]
+name = "pixet"
+version = "0.1.0"
+description = "MCP server: stateful indexed-color pixel art editor"
+readme = "README.md"
+authors = [
+    { name = "Simone Sturniolo", email = "simonesturniolo@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "mcp>=1.2",
+    "pillow>=12.3.0",
+]
+
+[project.scripts]
+pixet-mcp = "pixet:main"
+
+[build-system]
+requires = ["uv_build>=0.12.0,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
