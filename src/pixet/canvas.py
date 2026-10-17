@@ -246,6 +246,81 @@ class Canvas:
             self.pixels[py * w + px] = color if use_primary else color2
         return len(region)
 
+    def draw_ascii(self, x: int, y: int, rows: list[str], key: dict[str, int]) -> int:
+        """Draw text rows as pixels, with the top-left at (x, y).
+
+        `key` maps one character to a palette index. '.' and ' ' are skipped
+        (the pixel stays as it is). Returns how many pixels were written.
+        """
+        for ch, index in key.items():
+            if len(ch) != 1:
+                raise CanvasError(f"Key {ch!r} must be one character")
+            if ch in ".  ":
+                raise CanvasError(f"Key {ch!r} is reserved for 'leave as it is'")
+            self._check_index(index)
+        pts_by_color: dict[int, list[tuple[int, int]]] = {}
+        for dy, row in enumerate(rows):
+            for dx, ch in enumerate(row):
+                if ch in ". ":
+                    continue
+                if ch not in key:
+                    raise CanvasError(f"Character {ch!r} at row {dy}, column {dx} is not in the key")
+                pts_by_color.setdefault(key[ch], []).append((x + dx, y + dy))
+        self._snapshot()
+        return sum(self._plot(pts, color) for color, pts in pts_by_color.items())
+
+    def copy_region(
+        self,
+        x: int,
+        y: int,
+        width: int,
+        height: int,
+        dest_x: int,
+        dest_y: int,
+        flip_x: bool = False,
+        flip_y: bool = False,
+        skip_color: int | None = None,
+    ) -> int:
+        """Copy a block of pixels to (dest_x, dest_y), optionally mirrored.
+
+        The source is read before writing, so source and destination may overlap.
+        Source pixels outside the canvas are skipped; so are source pixels equal
+        to `skip_color` (for example 0, to paste a sprite over what is there).
+        Returns how many pixels were written.
+        """
+        if width < 1 or height < 1:
+            raise CanvasError("Region width and height must be at least 1")
+        if skip_color is not None:
+            self._check_index(skip_color)
+        w = self.width
+        block = [
+            [self.pixels[sy * w + sx] if self._in_bounds(sx, sy) else None for sx in range(x, x + width)]
+            for sy in range(y, y + height)
+        ]
+        self._snapshot()
+        n = 0
+        for by in range(height):
+            for bx in range(width):
+                v = block[height - 1 - by if flip_y else by][width - 1 - bx if flip_x else bx]
+                if v is None or v == skip_color:
+                    continue
+                n += self._plot([(dest_x + bx, dest_y + by)], v)
+        return n
+
+    def resize_canvas(self, width: int, height: int, background: int = 0) -> None:
+        """Change the canvas size. Pixels keep their place from the top-left;
+        new area is filled with `background`, area outside the new size is cut."""
+        self._check_index(background)
+        if not (1 <= width <= MAX_SIZE and 1 <= height <= MAX_SIZE):
+            raise CanvasError(f"Size must be 1..{MAX_SIZE} on each side")
+        old, ow, oh = self.pixels, self.width, self.height
+        self._snapshot()
+        self.pixels = bytearray([background]) * (width * height)
+        for py in range(min(oh, height)):
+            cols = min(ow, width)
+            self.pixels[py * width : py * width + cols] = old[py * ow : py * ow + cols]
+        self.width, self.height = width, height
+
     # ---- output ----------------------------------------------------------
 
     def to_pil(self) -> PILImage.Image:

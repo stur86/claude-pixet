@@ -42,6 +42,22 @@ class Document:
         self.commit()
         return p
 
+    def open(self, path: str, record: bool = False) -> Path:
+        """Make an existing indexed PNG the working file. Its palette is loaded too."""
+        p = Path(path).expanduser().resolve()
+        if p.suffix.lower() != ".png":
+            raise CanvasError("Path must end in .png")
+        if not p.exists():
+            raise CanvasError(f"{p} does not exist")
+        self.canvas.read_png(str(p))
+        self.canvas.clear_history()
+        self.path, self.record, self.frame = p, record, 0
+        if record:
+            for old in self.frame_paths():
+                old.unlink()
+            self.commit()
+        return p
+
     def load(self) -> Canvas:
         """Read the file into the canvas and return the canvas."""
         if self.path is None:

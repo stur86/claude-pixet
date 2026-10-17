@@ -57,3 +57,15 @@ def test_new_clears_undo_and_checks_suffix(tmp_path):
     assert not doc.load().undo()
     with pytest.raises(CanvasError):
         doc.new(str(tmp_path / "a.gif"), 2, 2)
+
+
+def test_open_existing(tmp_path):
+    other = Canvas(3, 2)
+    other.set_palette(["#00000000", "#ff0000"])
+    other.set_pixels([(2, 1)], 1)
+    other.write_png(str(tmp_path / "a.png"))
+    doc = Document()
+    doc.open(str(tmp_path / "a.png"))
+    assert doc.load().get(2, 1) == 1 and len(doc.canvas.palette) == 2
+    with pytest.raises(CanvasError):
+        doc.open(str(tmp_path / "missing.png"))

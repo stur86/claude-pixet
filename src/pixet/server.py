@@ -67,6 +67,18 @@ def new_image(
 
 
 @mcp.tool()
+def open_image(path: str, record_frames: bool = False) -> str:
+    """Open an existing indexed PNG as the working image (for example one edited by hand).
+
+    Its own palette is loaded. Every change is written back to it at once.
+    With `record_frames`, changes also save numbered copies (see new_image).
+    """
+    p = _run(doc.open, path, record_frames)
+    c = doc.canvas
+    return f"Opened {c.width}x{c.height} image {p}.{_frame_text()} Palette: {_palette_text()}"
+
+
+@mcp.tool()
 def set_palette(colors: list[str]) -> str:
     """Replace the palette. `colors` is a list of hex strings.
 
@@ -154,6 +166,48 @@ def flood_fill(
     """
     n = _edit("flood_fill", x, y, color, dither, color2, density)
     return f"Filled {n} pixels"
+
+
+@mcp.tool()
+def draw_ascii(x: int, y: int, rows: list[str], key: dict[str, int]) -> str:
+    """Draw pixel art from text rows, with the top-left at (x, y).
+
+    Each character is one pixel; `key` maps characters to palette indices,
+    for example {"o": 1, "S": 3}. '.' and ' ' leave the pixel as it is.
+    Draws a whole sprite in one call: keep the art as text and redraw it.
+    """
+    n = _edit("draw_ascii", x, y, rows, key)
+    return f"Drew {n} pixels"
+
+
+@mcp.tool()
+def copy_region(
+    x: int,
+    y: int,
+    width: int,
+    height: int,
+    dest_x: int,
+    dest_y: int,
+    flip_x: bool = False,
+    flip_y: bool = False,
+    skip_color: int | None = None,
+) -> str:
+    """Copy the block at (x, y, width, height) to (dest_x, dest_y).
+
+    `flip_x` / `flip_y` mirror the copy. Pixels equal to `skip_color` are not
+    copied (use 0 to paste a sprite over what is there). Good for animation
+    frames: copy the base frame, then change a few pixels.
+    """
+    n = _edit("copy_region", x, y, width, height, dest_x, dest_y, flip_x, flip_y, skip_color)
+    return f"Copied {n} pixels"
+
+
+@mcp.tool()
+def resize_canvas(width: int, height: int, background: int = 0) -> str:
+    """Change the image size. Pixels keep their place from the top-left corner;
+    new area gets `background`. Use it to make room for more frames in a sheet."""
+    _edit("resize_canvas", width, height, background)
+    return f"Canvas is now {width}x{height}"
 
 
 @mcp.tool()

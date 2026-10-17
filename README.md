@@ -48,6 +48,10 @@ claude --plugin-dir /path/to/claude-pixet
 | `draw_rect(x, y, width, height, color, filled=False)` | Rectangle outline or fill. |
 | `draw_circle(cx, cy, radius, color, filled=False)` | Midpoint circle outline or fill. |
 | `flood_fill(x, y, color, dither="none", color2=None, density=0.5)` | 4-connected fill. Dither: `none`, `checker`, `bayer` (uses `density`), `hlines`, `vlines`, `diagonal`. |
+| `open_image(path, record_frames=False)` | Open an existing indexed PNG as the working image (for example one edited by hand), with its own palette. |
+| `draw_ascii(x, y, rows, key)` | Draw text rows as pixels: `key` maps characters to palette indices; `.` and space leave pixels as they are. Draws a whole sprite in one call. |
+| `copy_region(x, y, width, height, dest_x, dest_y, flip_x=False, flip_y=False, skip_color=None)` | Copy a block, optionally mirrored. Pixels equal to `skip_color` are not copied (use 0 to paste over). Source and destination may overlap. |
+| `resize_canvas(width, height, background=0)` | Change the image size, keeping pixels from the top-left. For example, to add frames to a sprite sheet. |
 | `undo()` | Revert the last change (50 steps). Counts as a change, so it writes a frame. |
 | `get_image(scale=None, grid=False)` | Scaled-up PNG preview for the agent. Transparency shows as a checkerboard. |
 | `save_image(path, scale=1)` | Export a true-color copy with real transparency, for example scaled up. |

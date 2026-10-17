@@ -94,3 +94,44 @@ def test_read_png_rejects_rgba(tmp_path):
     Image.new("RGBA", (2, 2)).save(tmp_path / "a.png")
     with pytest.raises(CanvasError):
         Canvas().read_png(str(tmp_path / "a.png"))
+
+
+def test_draw_ascii():
+    c = Canvas(4, 3)
+    c.set_pixels([(3, 0)], 5)
+    n = c.draw_ascii(1, 0, ["ab.", " b"], {"a": 1, "b": 2})
+    assert n == 3
+    assert pix(c) == ["0125", "0020", "0000"]
+    with pytest.raises(CanvasError):
+        c.draw_ascii(0, 0, ["z"], {"a": 1})
+    with pytest.raises(CanvasError):
+        c.draw_ascii(0, 0, ["a"], {"a": 99})
+    with pytest.raises(CanvasError):
+        c.draw_ascii(0, 0, ["."], {".": 1})
+
+
+def test_copy_region_flip_and_skip():
+    c = Canvas(6, 2)
+    c.draw_ascii(0, 0, ["12", "3."], {"1": 1, "2": 2, "3": 3})
+    c.copy_region(0, 0, 2, 2, 2, 0, flip_x=True)
+    assert pix(c) == ["122100", "300300"]
+    c.set_pixels([(5, 1)], 4)
+    c.copy_region(0, 0, 2, 2, 4, 0, skip_color=0)  # transparent source pixel keeps the 4
+    assert pix(c)[1][4:] == "34"
+    c.copy_region(0, 0, 2, 2, 0, 0, flip_y=True)
+    assert pix(c)[0][:2] == "30"
+
+
+def test_copy_region_overlap():
+    c = Canvas(4, 1)
+    c.draw_ascii(0, 0, ["12"], {"1": 1, "2": 2})
+    c.copy_region(0, 0, 2, 1, 1, 0)
+    assert pix(c) == ["1120"]
+
+
+def test_resize_canvas_keeps_pixels():
+    c = Canvas(2, 2)
+    c.draw_ascii(0, 0, ["12", "34"], {"1": 1, "2": 2, "3": 3, "4": 4})
+    c.resize_canvas(3, 1, background=5)
+    assert pix(c) == ["125"]
+    assert c.undo() and pix(c) == ["12", "34"]
